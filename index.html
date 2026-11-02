@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我们的时光</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 29'%3E%3Cpath fill='%23d9867f' d='M16 28.7 4.7 17.5a8.9 8.9 0 0 1 0-12.6A8.6 8.6 0 0 1 16 5.2a8.6 8.6 0 0 1 11.3-.3 8.9 8.9 0 0 1 0 12.6L16 28.7Z'/%3E%3C/svg%3E">
+<style>
+  /* ============ 设计系统 ============ */
+  :root{
+    --bg:#f7ede6;
+    --card:#fffdfa;
+    --note:#fbf3d9;        /* 便签米黄 */
+    --note-edge:#f0e2b8;
+    --rose:#d9867f;
+    --rose-deep:#c26a64;
+    --rose-soft:#f3dfdc;
+    --ink:#6b4f4a;
+    --ink-soft:#a98f88;
+    --line:#eadbd3;
+    --shadow:0 10px 24px rgba(120,70,60,.10);
+    --shadow-lg:0 24px 48px rgba(120,70,60,.18);
+    --radius:18px;
+    --font-title:"Kaiti SC","STKaiti","KaiTi",serif;
+    --font-body:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:var(--font-body);background:var(--bg);color:var(--ink);line-height:1.7;min-height:100vh}
+  .deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .deco .arc{position:absolute;top:-90px;right:-70px;width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, rgba(217,134,127,.16), rgba(217,134,127,0) 70%)}
+  .deco .arc2{position:absolute;bottom:-60px;left:-60px;width:220px;height:220px;border-radius:50%;
+    background:radial-gradient(circle, rgba(232,168,124,.12), rgba(232,168,124,0) 70%)}
+  .wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 18px 100px}
+
+  /* ============ Hero ============ */
+  header{padding:48px 0 8px;text-align:center}
+  .heart{width:42px;height:38px;margin:0 auto 12px;color:var(--rose)}
+  h1{font-family:var(--font-title);font-weight:700;font-size:clamp(32px,8vw,48px);letter-spacing:.12em;color:#7a4a44}
+  .sub{margin-top:10px;color:var(--ink-soft);font-size:15px;letter-spacing:.06em}
+  .count{margin-top:16px;display:inline-flex;align-items:center;gap:6px;background:var(--rose-soft);
+    color:var(--rose-deep);font-size:13px;padding:6px 14px;border-radius:999px}
+  .count b{font-size:15px}
+
+  /* ============ 时间线 feed ============ */
+  .feed{margin-top:36px;display:flex;flex-direction:column;gap:22px}
+
+  /* 照片卡（宝丽来） */
+  .polaroid{background:var(--card);border-radius:14px;box-shadow:var(--shadow);
+    padding:10px 10px 12px;transform:rotate(var(--t,0deg));
+    transition:transform .3s, box-shadow .3s}
+  .polaroid:hover{transform:rotate(0deg);box-shadow:var(--shadow-lg)}
+  .polaroid img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;display:block;background:var(--rose-soft)}
+  .polaroid .cap{padding:10px 6px 2px;font-family:var(--font-title);color:var(--ink)}
+  .polaroid .cap .when{font-size:13px;color:var(--ink-soft);letter-spacing:.05em}
+  .polaroid .cap .txt{font-size:16px;line-height:1.6;color:#6b4a44;margin-top:4px;word-break:break-word}
+
+  /* 留言卡（便签纸条） */
+  .note{background:var(--note);border-radius:6px 6px 14px 14px;box-shadow:var(--shadow);
+    padding:20px 22px;transform:rotate(var(--nt,-1.2deg));position:relative;
+    border-bottom:2px solid var(--note-edge);transition:transform .3s}
+  .note:hover{transform:rotate(0)}
+  .note:before{content:"";position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-4deg);
+    width:64px;height:20px;background:rgba(217,134,127,.35);border-radius:2px}
+  .note .txt{font-family:var(--font-title);font-size:18px;line-height:1.8;color:#6b4a3a;white-space:pre-wrap;word-break:break-word}
+  .note .when{margin-top:12px;font-size:13px;color:#a08a5a;text-align:right;font-family:var(--font-body)}
+
+  /* ============ 空态 ============ */
+  .empty{margin-top:44px;text-align:center;padding:48px 20px;border:2px dashed var(--line);border-radius:var(--radius)}
+  .empty svg{width:52px;height:52px;color:var(--rose);opacity:.7}
+  .empty p{margin-top:14px;color:var(--ink-soft);font-size:15px}
+  .empty button{margin-top:20px}
+
+  /* ============ 按钮 ============ */
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;background:var(--rose);
+    color:#fff;font-size:15px;font-family:var(--font-body);padding:12px 22px;border-radius:999px;
+    transition:background .2s}
+  .btn:hover{background:var(--rose-deep)}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+
+  .fab{position:fixed;right:20px;bottom:24px;width:60px;height:60px;border-radius:50%;z-index:40;
+    background:var(--rose);color:#fff;border:none;cursor:pointer;box-shadow:var(--shadow-lg);
+    display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s}
+  .fab:hover{background:var(--rose-deep);transform:translateY(-3px)}
+  .fab svg{width:26px;height:26px}
+
+  /* ============ 弹层 ============ */
+  .mask{position:fixed;inset:0;background:rgba(90,55,48,.42);z-index:50;display:none;
+    align-items:center;justify-content:center;padding:18px}
+  .mask.show{display:flex}
+  .modal{background:#fffdfa;border-radius:var(--radius);max-width:440px;width:100%;padding:26px 24px;
+    box-shadow:var(--shadow-lg);max-height:92vh;overflow:auto}
+  .modal h2{font-family:var(--font-title);font-size:24px;color:#7a4a44;text-align:center;letter-spacing:.08em}
+  .modal .note-sub{text-align:center;color:var(--ink-soft);font-size:13px;margin-top:6px}
+  .field{margin-top:16px}
+  .field label{display:block;font-size:13px;color:var(--ink);margin-bottom:7px}
+  .field input[type=password],.field textarea{
+    width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;
+    font-size:16px;color:var(--ink);background:#fff;outline:none;transition:border .2s;
+    font-family:var(--font-body)}
+  .field textarea{min-height:84px;resize:vertical;line-height:1.6}
+  .field input:focus,.field textarea:focus{border-color:var(--rose)}
+  .drop{margin-top:8px;border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;
+    color:var(--ink-soft);font-size:14px;cursor:pointer;transition:border .2s,background .2s}
+  .drop:hover,.drop.drag{border-color:var(--rose);background:var(--rose-soft)}
+  .preview{margin-top:12px;display:none;text-align:center}
+  .preview.show{display:block}
+  .preview img{max-width:100%;max-height:220px;border-radius:10px;box-shadow:var(--shadow)}
+  .actions{margin-top:20px;display:flex;gap:10px}
+  .actions .btn{flex:1;justify-content:center}
+  .btn.ghost{background:#f0e2dc;color:#8a5f55}
+  .btn.ghost:hover{background:#e7d4cc}
+  .status{margin-top:14px;font-size:13px;text-align:center;min-height:20px;color:var(--rose-deep)}
+  .status.err{color:#c0392b}
+
+  .viewer{position:fixed;inset:0;background:rgba(40,25,22,.9);z-index:60;display:none;
+    align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+  .viewer.show{display:flex}
+  .viewer img{max-width:92vw;max-height:86vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);
+    background:#6b4f4a;color:#fff;padding:11px 20px;border-radius:999px;font-size:14px;
+    opacity:0;pointer-events:none;transition:.3s;z-index:80;box-shadow:var(--shadow-lg)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  footer{margin-top:56px;text-align:center;color:var(--ink-soft);font-size:13px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+  <div class="deco" aria-hidden="true"><div class="arc"></div><div class="arc2"></div></div>
+
+  <div class="wrap">
+    <header>
+      <svg class="heart" viewBox="0 0 32 29" fill="currentColor" aria-hidden="true">
+        <path d="M16 28.7 4.7 17.5a8.9 8.9 0 0 1 0-12.6A8.6 8.6 0 0 1 16 5.2a8.6 8.6 0 0 1 11.3-.3 8.9 8.9 0 0 1 0 12.6L16 28.7Z"/>
+      </svg>
+      <h1>我们的时光</h1>
+      <p class="sub">一张卡片，一个网址，把我们装进去</p>
+      <div class="count"><span>已记录</span><b id="countNum">0</b><span>条</span></div>
+    </header>
+
+    <main class="feed" id="feed" aria-live="polite"></main>
+
+    <div class="empty" id="empty" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>
+      </svg>
+      <p>这里还空着，传一张照片，或写下第一句悄悄话吧</p>
+      <button class="btn" id="emptyAdd">写第一条</button>
+    </div>
+
+    <footer>把手机贴近 NFC 卡片，就能回到这里</footer>
+  </div>
+
+  <button class="fab" id="fab" aria-label="添加">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </button>
+
+  <!-- 弹层 -->
+  <div class="mask" id="mask">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="写一条时光">
+      <h2>写一条时光</h2>
+      <p class="note-sub">照片和留言至少填一个，都会自动记下时间</p>
+
+      <div class="field">
+        <label for="pwd">上传密码</label>
+        <input type="password" id="pwd" placeholder="输入密码" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="txt">留言（可空）</label>
+        <textarea id="txt" placeholder="此刻想说的话……"></textarea>
+      </div>
+
+      <div class="field">
+        <label>照片（可空）</label>
+        <div class="drop" id="drop">点击选择图片，或拖到此处<br><span style="font-size:12px">支持 JPG / PNG / WEBP / GIF</span></div>
+        <input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+        <div class="preview" id="preview"><img id="prevImg" alt="预览"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn ghost" id="cancel">取消</button>
+        <button class="btn" id="upload">发布</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <div class="viewer" id="viewer"><img id="viewerImg" alt="查看大图"></div>
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ===== 部署后需要填的地址 ===== */
+  var CONFIG = {
+    UPLOAD_API: "https://1522296899-komftpqbg6.ap-beijing.tencentscf.com",   // 云函数公网地址
+    RECORDS_LIST: "https://love0830-1522296899.cos.ap-beijing.myqcloud.com/records.json" // 记录清单（COS 完整地址；fetch 取数据不受默认域名下载限制）
+  };
+
+  var MAX_BYTES = 15 * 1024 * 1024;
+  var extRe = /\.(jpe?g|png|webp|gif)$/i;
+  var photoTilt = [-1.2, 0.8, -0.5, 1.0, 0, -0.8, 1.3];
+  var noteTilt = [-1.2, 1.0, -0.6, 1.4, -1.0];
+
+  var feed = document.getElementById('feed');
+  var empty = document.getElementById('empty');
+  var countNum = document.getElementById('countNum');
+  var mask = document.getElementById('mask');
+  var pwd = document.getElementById('pwd');
+  var txt = document.getElementById('txt');
+  var file = document.getElementById('file');
+  var drop = document.getElementById('drop');
+  var preview = document.getElementById('preview');
+  var prevImg = document.getElementById('prevImg');
+  var uploadBtn = document.getElementById('upload');
+  var statusEl = document.getElementById('status');
+  var viewer = document.getElementById('viewer');
+  var viewerImg = document.getElementById('viewerImg');
+  var toast = document.getElementById('toast');
+
+  var chosenFile = null;
+
+  function showToast(msg){
+    toast.textContent = msg; toast.classList.add('show');
+    setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+  }
+
+  function api(payload){
+    return fetch(CONFIG.UPLOAD_API, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    }).then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error || '请求失败'); return j; }); });
+  }
+
+  /* ===== 读取记录并渲染 ===== */
+  function loadFeed(){
+    return fetch(CONFIG.RECORDS_LIST, {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(list){ if(!Array.isArray(list)) throw new Error('bad json'); render(list); })
+      .catch(function(){ render([]); });
+  }
+
+  function render(list){
+    feed.innerHTML = '';
+    countNum.textContent = list.length;
+    empty.hidden = list.length > 0;
+
+    var sorted = list.slice().sort(function(a,b){ return (b.time||0) - (a.time||0); });
+    var pi = 0, ni = 0;
+
+    sorted.forEach(function(item){
+      if(item.type === 'photo'){
+        var card = document.createElement('div');
+        card.className = 'polaroid';
+        card.style.setProperty('--t', (photoTilt[pi++ % photoTilt.length]) + 'deg');
+        var img = document.createElement('img');
+        img.loading = 'lazy'; img.alt = '照片'; img.src = item.photo;
+        img.addEventListener('click', function(){ viewerImg.src = item.photo; viewer.classList.add('show'); });
+        var cap = document.createElement('div'); cap.className = 'cap';
+        var when = document.createElement('div'); when.className = 'when'; when.textContent = item.date || '';
+        cap.appendChild(when);
+        if(item.text){ var t = document.createElement('div'); t.className='txt'; t.textContent = item.text; cap.appendChild(t); }
+        card.appendChild(img); card.appendChild(cap);
+        feed.appendChild(card);
+      } else {
+        var n = document.createElement('div');
+        n.className = 'note';
+        n.style.setProperty('--nt', (noteTilt[ni++ % noteTilt.length]) + 'deg');
+        var t2 = document.createElement('div'); t2.className = 'txt'; t2.textContent = item.text || '';
+        var w2 = document.createElement('div'); w2.className = 'when'; w2.textContent = item.date || '';
+        n.appendChild(t2); n.appendChild(w2);
+        feed.appendChild(n);
+      }
+    });
+  }
+
+  /* ===== 弹层 ===== */
+  function openModal(){ mask.classList.add('show'); pwd.focus(); }
+  function closeModal(){ mask.classList.remove('show'); resetForm(); }
+  function resetForm(){
+    pwd.value=''; txt.value=''; chosenFile=null; file.value='';
+    preview.classList.remove('show'); prevImg.src='';
+    statusEl.textContent=''; statusEl.classList.remove('err');
+  }
+
+  drop.addEventListener('click', function(){ file.click(); });
+  file.addEventListener('change', function(){ pick(file.files && file.files[0]); });
+  drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragleave', function(){ drop.classList.remove('drag'); });
+  drop.addEventListener('drop', function(e){ e.preventDefault(); drop.classList.remove('drag'); pick(e.dataTransfer && e.dataTransfer.files[0]); });
+
+  function pick(f){
+    if(!f) return;
+    if(!extRe.test(f.name)){ showToast('请选择图片文件'); return; }
+    if(f.size > MAX_BYTES){ showToast('图片不能超过 15MB'); return; }
+    chosenFile = f;
+    prevImg.src = URL.createObjectURL(f);
+    preview.classList.add('show');
+  }
+
+  uploadBtn.addEventListener('click', function(){
+    var password = pwd.value.trim();
+    var text = txt.value.trim();
+    if(!password){ statusEl.textContent='请输入密码'; statusEl.classList.add('err'); return; }
+    if(!chosenFile && !text){ statusEl.textContent='至少上传一张照片或写一句留言'; statusEl.classList.add('err'); return; }
+
+    uploadBtn.disabled = true;
+    statusEl.classList.remove('err');
+
+    var step = Promise.resolve();
+
+    // 有照片：先签发 → 直传 → confirm
+    if(chosenFile){
+      statusEl.textContent = '正在准备上传…';
+      step = api({ password:password, action:'sign',
+        filename:chosenFile.name, contentType:chosenFile.type||'image/jpeg', size:chosenFile.size })
+        .then(function(j){
+          statusEl.textContent = '正在上传照片…';
+          return fetch(j.uploadUrl, { method:'PUT',
+            headers:{ 'Content-Type': chosenFile.type||'image/jpeg' }, body: chosenFile })
+            .then(function(){ return j; });
+        })
+        .then(function(j){
+          statusEl.textContent = '正在保存…';
+          return api({ password:password, action:'confirm', photoUrl:j.photoUrl, text:text });
+        });
+    } else {
+      statusEl.textContent = '正在写下…';
+      step = api({ password:password, action:'note', text:text });
+    }
+
+    step.then(function(){
+      closeModal(); showToast('已记录这一刻'); loadFeed();
+    }).catch(function(err){
+      statusEl.textContent = err.message || '发布失败，请重试';
+      statusEl.classList.add('err');
+      uploadBtn.disabled = false;
+    });
+  });
+
+  document.getElementById('cancel').addEventListener('click', closeModal);
+  mask.addEventListener('click', function(e){ if(e.target===mask) closeModal(); });
+  document.getElementById('fab').addEventListener('click', openModal);
+  document.getElementById('emptyAdd').addEventListener('click', openModal);
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+  viewer.addEventListener('click', function(){ viewer.classList.remove('show'); viewerImg.src=''; });
+
+  loadFeed();
+})();
+</script>
+</body>
+</html>
